@@ -7,33 +7,42 @@ minetest.register_tool("bouncing_ball:ball", {
              local dir = user:get_look_dir()
              if pos and dir then
                  pos.y = pos.y + 1.6
-                 local obj = minetest.add_entity(pos, "bouncing_ball:my_bouncing_ball")
-                 if obj then
-                    obj.direction = {x=dir.x, y=dir.y , z=dir.z }
-                 end
+                 minetest.add_entity(pos, "bouncing_ball:my_bouncing_ball")
              end
         end 
 })
 
-local my_bouncing_ball = {
+my_bouncing_ball = {
     initial_properties = {
         physical = false,
         timer = 0,
         textures = {"sphere.png"},
-        direction = {x=0., y=0.,z=0.},
     },
-
+    v0 = {x=10., y=20.5,z=0.},
+    timer = 0,
     message = "This is entity to represent a bouncing ball",
 }
-
 my_bouncing_ball.on_step = function(self, dtime, node, pos)
     --self.timer = self.timer + dtime
     local pos = self.object:getpos()
-    local vel = self.object.direction
-    -- currently x  += v  * dt (rectiline movement)
-    local pos_next = vector.add(pos, {x=vel.x * dtime, y=vel.y * dtime, z= vel.z *dtime})
+    local prop = self.object:get_properties()
+    local max_height =100 
+    self.timer = self.timer + dtime
+    -- currently y += v_y * dt with v_y = (-g * t + v_y0)
+    local vel = {x = self.v0.x, y = -9.81 * self.timer + self.v0.y, z = self.v0.z}
+    local pos_next = vector.add(pos, {x= vel.x * dtime, y= vel.y * dtime, z= vel.z * dtime})
     if minetest.get_node(pos_next).name == "air" then
-        self.object:move_to(pos_next)
+            self.object:move_to(pos_next)
+            --print('x = ' .. tostring(pos_next.x) .. ", y = " .. tostring(pos_next.y) .. ", z = " .. pos_next.z .. "t = " .. tostring(self.timer))
+            if (self.object:getpos().y > max_height) then
+                self.object:remove()
+            end
+            if (self.object:getpos().y < 0.) then
+                self.object:remove()
+            end
+    else --next position is not empty -> destroy the object
+        self.object:remove()
     end
 end
+
 minetest.register_entity("bouncing_ball:my_bouncing_ball", my_bouncing_ball)
