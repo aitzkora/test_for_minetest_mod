@@ -34,12 +34,6 @@ my_bouncing_ball.on_step = function(self, dtime, node, pos)
     if minetest.get_node(pos_next).name == "air" then
             self.object:move_to(pos_next)
             --print('x = ' .. tostring(pos_next.x) .. ", y = " .. tostring(pos_next.y) .. ", z = " .. pos_next.z .. "t = " .. tostring(self.timer))
-            if (self.object:getpos().y > max_height) then
-                self.object:remove()
-            end
-            if (self.object:getpos().y < 0.) then
-                self.object:remove()
-            end
     else --next position is not empty -> destroy the object
         self.object:remove()
     end
